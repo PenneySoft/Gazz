@@ -78,7 +78,10 @@ $('#selectCountry').change(function(){
 					$('#Cn').html(result['data'][0]['continentName']);
 					$('#CName').html(result['data'][0]['countryName']);
 					$('#lng').html(result['data'][0]['languages']);
-					$('#CC').html(result['data'][0]['countryCode']);
+                    $('#CC').html(result['data'][0]['countryCode']);
+                    
+                    const capital = result['data'][0]['capital'];
+                    getWeatherData(capital);
             }
         },
         error: function(jqXHR, textStatus, errorThrown){
@@ -93,24 +96,27 @@ $('#infoModal').on('shown.bs.modal', function () {
  //Get weather Info
  
  
-function getWeatherData(){
+function getWeatherData(capital){
     $.ajax({
-        url: "libs/php/getWeather.php",
+        url: "libs/php/getWeatherInfo.php",
         type: 'POST',
         dataType: 'json',
         data: {
            // q: $('#selectCountry').val(),capital
-		   q:capital
+		   capitalCity: capital
         },
         success: function(result){
-            if(result.cod == 200){
+            if(result.status.code == 200){
                 console.log(result);
-                $('#temperature').html(`${Math.floor(parseFloat(result['main']['temp']) - 273.15)} <sup>o</sup>C`);
-                $('#humidity').html(`${result['main']['humidity']} %`);
-                $('#pressure').html(`${result['main']['pressure']} hPa`);
-                lng = result['coord']['lon'];
-                lat = result['coord']['lat'];
-                updateMarker(result['coord']['lat'], result['coord']['lon']);
+                const { data } = result;
+                const { main, coord } = data;
+                $('#temperature').html(`${Math.floor(parseFloat(main['temp']) - 273.15)} <sup>o</sup>C`);
+                $('#humidity').html(`${main['humidity']} %`);
+                $('#pressure').html(`${main['pressure']} hPa`);
+                const lng = coord['lon'];
+                const lat = coord['lat'];
+                // Not defined:
+                updateMarker(lat, lng);
             }
         },
         error: function(jqXHR, textStatus, errorThrown){
